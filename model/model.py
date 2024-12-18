@@ -1,23 +1,25 @@
 import configparser
-from config import roleplay_template
+from config_py import *
 
 config = configparser.ConfigParser()
-config.read('config.ini')
-model = config['MODEL']['model']
-os = config['SYSTEM']['os']
+config.read('./config.ini')
+model = config['SYSTEM']['model']
+method = config['SYSTEM']['method']
+character = config['CHARACTER']['name']
+user = config['USER']['name']
+instruction = eval(f"f'{config['CHARACTER']['instruction']}'")
+scenario = eval(f"f'{config['CHARACTER']['scenario']}'")
 
-if os == 'Windows':
+messages = [
+        {"role": "system", "content": instruction + scenario},
+    ]
+
+if method == 'transformers':
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    model = AutoModelForCausalLM.from_pretrained(model).to('cuda')
+
+    model = AutoModelForCausalLM.from_pretrained(model, device_map = "cuda").to('cuda')
     tokenizer = AutoTokenizer.from_pretrained(model)
-    if 'Vikhrmodels' in model:
-        messages = [
-            {"role": "system", "content": "Твоё имя Ева. Ты милая девочка. Действуй, думай, отвечай как она"},
-        ]
-    else:
-        messages = [
-            {"role": "system", "content": "Your name is Eva. You are a cute girl. Act, think, answer like she does"},
-        ]
+
 else:
     from unsloth import FastLanguageModel
 
@@ -26,7 +28,7 @@ else:
     load_in_4bit = True
 
     model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "unsloth/Llama-3.2-1B-Instruct",
+        model_name = model,
         max_seq_length = max_seq_length,
         dtype = dtype,
         load_in_4bit = load_in_4bit,
@@ -46,7 +48,7 @@ def getMessage(user_input):
         add_generation_prompt = True,
         return_tensors = "pt",
     ).to("cuda")
-    
+
     outputs = model.generate(
         input_ids = inputs, 
         max_new_tokens = 4096, 
@@ -59,3 +61,8 @@ def getMessage(user_input):
     assistant_response = generated_text.split("assistant")[-1].strip()
     
     messages.append({"role": "assistant", "content": assistant_response})
+
+    return assistant_response
+
+while True:
+    print(getMessage(input()))
