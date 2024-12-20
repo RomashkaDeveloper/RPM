@@ -1,16 +1,26 @@
+import json
+import torch
 import configparser
 from config_py import *
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
 model = config['SYSTEM']['model']
 method = config['SYSTEM']['method']
-
-
-character = config['CHARACTER']['name']
 user = config['USER']['name']
-instruction = eval(f"f'{config['CHARACTER']['instruction']}'")
-scenario = eval(f"f'{config['CHARACTER']['scenario']}'")
+
+def load_config(CONFIG_FILE):
+    with open(CONFIG_FILE, 'r') as f:
+        return json.load(f)
+    
+config_json = load_config('scripts/config.json')
+characters = config_json['characters']
+
+character = config_json[0]['name']
+instruction = characters[0]['instruction'].format(character=character, user=user)
+scenario = characters[0]['scenario'].format(character=character, user=user)
 
 messages = [
         {"role": "system", "content": instruction + scenario},
@@ -19,7 +29,7 @@ messages = [
 if method == 'transformers':
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    model = AutoModelForCausalLM.from_pretrained(model, device_map = "cuda").to('cuda')
+    model = AutoModelForCausalLM.from_pretrained(model, device_map = device).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model)
 
 else:
@@ -34,7 +44,7 @@ else:
         max_seq_length = max_seq_length,
         dtype = dtype,
         load_in_4bit = load_in_4bit,
-        device_map='cuda'
+        device_map=device
     )
 
     FastLanguageModel.for_inference(model)
