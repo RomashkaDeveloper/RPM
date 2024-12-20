@@ -5,6 +5,8 @@ config = configparser.ConfigParser()
 config.read('./config.ini')
 model = config['SYSTEM']['model']
 method = config['SYSTEM']['method']
+
+
 character = config['CHARACTER']['name']
 user = config['USER']['name']
 instruction = eval(f"f'{config['CHARACTER']['instruction']}'")

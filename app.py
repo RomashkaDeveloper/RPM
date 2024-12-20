@@ -17,12 +17,10 @@ def print_header():
 
 def print_menu():
     print(Fore.YELLOW + "Choose an action:")
-    print(Fore.GREEN + "1. Create a character")
-    print(Fore.GREEN + "2. List characters")
-    print(Fore.GREEN + "3. Choose a character")
-    print(Fore.GREEN + "4. User profile")
-    print(Fore.GREEN + "5. Model settings")
-    print(Fore.RED + "6. Exit")
+    print(Fore.GREEN + "1. Open characters manager")
+    print(Fore.GREEN + "2. User profile")
+    print(Fore.GREEN + "3. Model settings")
+    print(Fore.RED + "4. Exit")
 
 def execute_script(script_name):
     try:
@@ -42,16 +40,12 @@ def main():
         choice = input(Fore.CYAN + "\nEnter your choice (1-6): " + Style.RESET_ALL)
         
         if choice == '1':
-            execute_script("create_character.py")
+            execute_script("scripts/characters_manager.py")
         elif choice == '2':
-            execute_script("scripts/list_characters.py")
+            execute_script("scripts/user_profile.py")
         elif choice == '3':
-            execute_script("choose_character.py")
-        elif choice == '4':
-            execute_script("user_profile.py")
-        elif choice == '5':
             execute_script("scripts/setup.py")
-        elif choice == '6':
+        elif choice == '4':
             print(Fore.YELLOW + "\nThank you for using RPM Console. Goodbye!")
             break
         else:
