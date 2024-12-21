@@ -37,7 +37,7 @@ def main():
         print_header()
         print_menu()
         
-        choice = input(Fore.CYAN + "\nEnter your choice (1-6): " + Style.RESET_ALL)
+        choice = input(Fore.CYAN + "\nEnter your choice (1-4): " + Style.RESET_ALL)
         
         if choice == '1':
             execute_script("scripts/characters_manager.py")

@@ -1,7 +1,8 @@
 import json
 import torch
 import configparser
-from config_py import *
+from model.config_py import *
+from transformers import TextStreamer
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -12,14 +13,16 @@ method = config['SYSTEM']['method']
 user = config['USER']['name']
 
 class Model:
-    def __init__(self, index):
+    def __init__(self, index, messages):
+        if messages:
+            self.messages = messages
         self.index = index
         self.load_config = self.load_config
         config_json = self.load_config('scripts/config.json')
         characters = config_json['characters']
 
         character = characters[self.index]['name']
-        instruction = characters[self.index]['instruction'].format(character=character, user=user)
+        # instruction = characters[self.index]['instruction'].format(character=character, user=user)
         scenario = characters[self.index]['scenario'].format(character=character, user=user)
 
         self.messages = [
@@ -51,6 +54,8 @@ class Model:
 
         self.tokenizer.chat_template = roleplay_template
 
+        self.text_streamer = TextStreamer(self.tokenizer, skip_prompt = True)
+
     def load_config(self, CONFIG_FILE):
         with open(CONFIG_FILE, 'r') as f:
             return json.load(f)
@@ -66,7 +71,8 @@ class Model:
         ).to(device)
 
         outputs = self.model.generate(
-            input_ids=inputs, 
+            input_ids=inputs,
+            streamer = self.text_streamer,
             max_new_tokens=4096, 
             use_cache=True, 
             temperature=1.5, 
@@ -77,9 +83,3 @@ class Model:
         assistant_response = generated_text.split("assistant")[-1].strip()
         
         self.messages.append({"role": "assistant", "content": assistant_response})
-
-        return assistant_response
-
-# lol = Model(0)   
-# while True:
-#     print(lol.getMessage(input()))
