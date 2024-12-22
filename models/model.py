@@ -83,11 +83,21 @@ class Model:
             tokenize=True,
             add_generation_prompt=True,
             return_tensors="pt",
+            padding=True
         ).to(device)
+
+        if isinstance(inputs, dict):
+            input_ids = inputs['input_ids'].to(device)
+            attention_mask = inputs['attention_mask'].to(device)
+        else:
+            input_ids = inputs
+            attention_mask = torch.ones_like(input_ids).to(device)
 
         if self.use_streamer:
             outputs = self.model.generate(
-                input_ids=inputs,
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                pad_token_id=self.tokenizer.eos_token_id,
                 streamer = self.text_streamer,
                 max_new_tokens=4096, 
                 use_cache=True, 
@@ -96,7 +106,9 @@ class Model:
             )
         else:
             outputs = self.model.generate(
-                input_ids=inputs, 
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                pad_token_id=self.tokenizer.eos_token_id, 
                 max_new_tokens=4096, 
                 use_cache=True, 
                 temperature=1.5, 
