@@ -20,7 +20,7 @@ class Model:
         characters = config_json['characters']
 
         character = characters[self.index]['name']
-        # self.instruction = characters[self.index]['instruction'].format(character=character, user=user)
+        self.instruction = characters[self.index]['instruction'].format(character=character, user=user)
         self.scenario = characters[self.index]['scenario'].format(character=character, user=user)
 
         self.check_messages(messages)
@@ -58,7 +58,7 @@ class Model:
             self.messages = messages
         else:
             self.messages = [
-                {"role": "system", "content": self.scenario},
+                {"role": "system", "content": self.instruction + self.scenario},
         ]
     
     def load_config(self, CONFIG_FILE):

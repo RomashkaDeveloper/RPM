@@ -58,6 +58,7 @@ def help():
     print(Fore.LIGHTBLUE_EX + "/help - Show this help message" + Style.RESET_ALL)
     print(Fore.LIGHTBLUE_EX + "/save - Save the current conversation" + Style.RESET_ALL)
     print(Fore.LIGHTBLUE_EX + "/load - Load a saved conversation" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + "/delete - Delete a saved conversation" + Style.RESET_ALL)
     print(Fore.LIGHTBLUE_EX + "/end - End the conversation" + Style.RESET_ALL)
 
 core = Model(index, choose_chat(), use_streamer)
@@ -85,6 +86,28 @@ def load():
     messages = choose_chat()
     push_messages(messages)
 
+def delete_chat():
+    global chats, config_chats
+    if not chats:
+        print(Fore.YELLOW + "No saved chats to delete.")
+        return
+
+    print(Fore.LIGHTBLUE_EX + "Select a chat to delete:")
+    for i, chat in enumerate(chats, 1):
+        print(Fore.LIGHTBLUE_EX + f"{i}. {chat['title']} - {chat['character']}" + Style.RESET_ALL)
+
+    try:
+        choice = int(input(Fore.GREEN + "Enter the number of the chat to delete: " + Style.RESET_ALL))
+        if 1 <= choice <= len(chats):
+            deleted_chat = chats.pop(choice - 1)
+            config_chats['chats'] = chats
+            save_config("scripts/chat.json", config_chats)
+            print(Fore.CYAN + f"Chat '{deleted_chat['title']}' deleted successfully!" + Style.RESET_ALL)
+        else:
+            print(Fore.RED + "Invalid choice.")
+    except ValueError:
+        print(Fore.RED + "Please enter a valid number.")
+
 def main():
     while True:
         user_input = input(Fore.GREEN + user_name + ": " + Fore.YELLOW)
@@ -96,6 +119,8 @@ def main():
             save()
         elif user_input == "/load":
             load()
+        elif user_input == "/delete":
+            delete_chat()
         else:
             if use_streamer:
                 print(Fore.GREEN + character_name + ': ' + Fore.YELLOW, end="")

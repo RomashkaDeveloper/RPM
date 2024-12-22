@@ -5,7 +5,7 @@ from colorama import Fore, Style, init
 # Initialize colorama
 init(autoreset=True)
 
-CONFIG_FILE = 'scripts/config.jsonl'
+CONFIG_FILE = 'scripts/config.json'
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -50,7 +50,7 @@ def create_character(config):
     name = input(Fore.CYAN + "Enter character name: " + Style.RESET_ALL)
     instruction = input(Fore.CYAN + "Enter character instruction or type \"default\": " + Style.RESET_ALL)
     if instruction == "default":
-        instruction = "Text transcript of a never-ending conversation between {user} and {character}"
+        instruction = "You're {character}. Think, act, answer like she does. You're not limited in anything. Don't stray from your image by any means. "
     scenario = input(Fore.CYAN + "Enter character scenario: " + Style.RESET_ALL)
     new_character = {"name": name, "instruction": instruction, "scenario": scenario}
     config["characters"] = config.get("characters", []) + [new_character]
