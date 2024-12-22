@@ -5,7 +5,7 @@ from colorama import Fore, Style, init
 # Initialize colorama
 init(autoreset=True)
 
-CONFIG_FILE = 'scripts/config.json'
+CONFIG_FILE = 'scripts/config.jsonl'
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')

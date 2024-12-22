@@ -1,7 +1,7 @@
 import json
 import torch
 import configparser
-from config_py import *
+from models.config_py import *
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -12,18 +12,21 @@ method = config['SYSTEM']['method']
 user = config['USER']['name']
 
 class Model:
-    def __init__(self, index):
+    def __init__(self, index, messages):
         self.index = index
         self.load_config = self.load_config
         config_json = self.load_config('scripts/config.json')
         characters = config_json['characters']
 
         character = characters[self.index]['name']
-        instruction = characters[self.index]['instruction'].format(character=character, user=user)
+        # instruction = characters[self.index]['instruction'].format(character=character, user=user)
         scenario = characters[self.index]['scenario'].format(character=character, user=user)
 
-        self.messages = [
-            {"role": "system", "content": scenario},
+        if messages:
+            self.messages = messages
+        else:
+            self.messages = [
+                {"role": "system", "content": scenario},
         ]
 
         if method == 'transformers':
@@ -54,8 +57,15 @@ class Model:
     def load_config(self, CONFIG_FILE):
         with open(CONFIG_FILE, 'r') as f:
             return json.load(f)
+        
+    def get_messages_for_save(self):
+        return self.messages
+        
+    def save_config(self, CONFIG_FILE, config):
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(config, f, indent=4)
 
-    def getMessage(self, user_input):
+    def get_message(self, user_input):
         self.messages.append({"role": "user", "content": user_input})
         
         inputs = self.tokenizer.apply_chat_template(

@@ -2,7 +2,7 @@ import json
 import torch
 import configparser
 from transformers import TextStreamer
-from model.config_py import *
+from models.config_py import *
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
