@@ -46,21 +46,23 @@ def main():
     else:  # llama_cpp
         models = ["TheBloke/Kunoichi-7B-GGUF", "custom model"]
 
-    model_choice = get_user_choice("Choose your model:", models)
+    model_choice = get_user_choice("Choose your repo:", models)
 
     if model_choice == len(models):  # custom model
-        model = input(Fore.CYAN + "Type your model's name here: " + Style.RESET_ALL)
+        repo = input(Fore.CYAN + "Type your repo's name here: " + Style.RESET_ALL)
+        model = input(Fore.CYAN + "Type your models's name here: " + Style.RESET_ALL)
     else:
-        model = models[model_choice - 1]
+        repo = models[model_choice - 1]
+        model = input(Fore.CYAN + "Type your models's name here: " + Style.RESET_ALL)
 
-    if method == "llama_cpp" and model_choice != 1:
-        print(Fore.YELLOW + "Other models are not supported yet. Download it by yourself")
-
-    # Save configuration
     config = configparser.ConfigParser()
     config.read('config.ini')
     config['SYSTEM']['model'] = model
     config['SYSTEM']['method'] = method
+
+    if method == "llama_cpp":
+        config['SYSTEM']['repo'] = repo
+    
     with open('./config.ini', 'w') as configfile:
         config.write(configfile)
 

@@ -11,6 +11,8 @@ config.read('./config.ini')
 model_name = config['SYSTEM']['model']
 method = config['SYSTEM']['method']
 user = config['USER']['name']
+if method == "llama_cpp":
+    repo = config['SYSTEM']['repo']
 
 class Model:
     def __init__(self, index, messages, use_streamer):
@@ -30,8 +32,7 @@ class Model:
 
             self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map=device).to(device).eval()
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-        else:
+        elif method == "unsloth":
             from unsloth import FastLanguageModel
 
             max_seq_length = 4096
@@ -47,6 +48,13 @@ class Model:
             )
 
             FastLanguageModel.for_inference(self.model)
+        else:
+            from llama_cpp import Llama
+
+            self.llm = Llama.from_pretrained(
+                repo_id="TheBloke/Kunoichi-7B-GGUF",
+                filename="kunoichi-7b.Q2_K.gguf",
+            )
 
         self.tokenizer.chat_template = roleplay_template
 
@@ -93,30 +101,36 @@ class Model:
             input_ids = inputs
             attention_mask = torch.ones_like(input_ids).to(device)
 
-        if self.use_streamer:
-            outputs = self.model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                pad_token_id=self.tokenizer.eos_token_id,
-                streamer = self.text_streamer,
-                max_new_tokens=4096, 
-                use_cache=True, 
-                temperature=1.5, 
-                min_p=0.1
+        if method == "llama_cpp":
+            output = self.llm.create_chat_completion(
+                messages=self.messages
             )
+            assistant_response = output['choices'][0]['message']['content']
         else:
-            outputs = self.model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                pad_token_id=self.tokenizer.eos_token_id, 
-                max_new_tokens=4096, 
-                use_cache=True, 
-                temperature=1.5, 
-                min_p=0.1
-            )
-        
-        generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        assistant_response = generated_text.split("assistant")[-1].strip()
+            if self.use_streamer:
+                outputs = self.model.generate(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    streamer = self.text_streamer,
+                    max_new_tokens=4096, 
+                    use_cache=True, 
+                    temperature=1.5, 
+                    min_p=0.1
+                )
+            else:
+                outputs = self.model.generate(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    pad_token_id=self.tokenizer.eos_token_id, 
+                    max_new_tokens=4096, 
+                    use_cache=True, 
+                    temperature=1.5, 
+                    min_p=0.1
+                )
+            
+            generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            assistant_response = generated_text.split("assistant")[-1].strip()
         
         self.messages.append({"role": "assistant", "content": assistant_response})
 
