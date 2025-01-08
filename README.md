@@ -19,7 +19,7 @@ cd llama.cpp
 
 mkdir build
 cd build
-cmake .. -G "Visual Studio 16 2019"  # Или используйте вашу версию Visual Studio
+cmake .. -G "Visual Studio 16 2019"  # Or use your version of Visual Studio
 cmake --build . --config Release
 
 pip install llama-cpp-python --no-binary llama-cpp-python
