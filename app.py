@@ -40,7 +40,7 @@ def main():
         choice = input(Fore.CYAN + "\nEnter your choice (1-4): " + Style.RESET_ALL)
         
         if choice == '1':
-            execute_script("scripts/characters_manager.py")
+            execute_script("scripts/character_manager.py")
         elif choice == '2':
             execute_script("scripts/user_profile.py")
         elif choice == '3':
